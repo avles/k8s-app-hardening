@@ -5,9 +5,37 @@ metadata:
 spec:
   containers:
     - image: busybox
-      name: busybox # Jn1TTnrDb9Tqgvq79qeFm8b8WHxHyo7xMggema8ERddUoL2blG4BwHFa
+      name: busybox 
       command: ["sh", "-c", 'while true; do echo "Running..."; sleep 2h; done']
       imagePullPolicy: Always
       securityContext:
         runAsNonRoot: true
         allowPrivilegeEscalation: false
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-app-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: python-app
+  template:
+    metadata:
+      labels:
+        app: python-app
+    spec:
+      containers:
+      - name: python-container
+        image: python:3.8-slim
+        command: ["bash", "-c", "while true; do sleep 10; done"]
+        volumeMounts:
+        - name: app-volume
+          mountPath: /app
+      volumes:
+      - name: app-volume
+        hostPath:
+          path: /path/to/your/local/source
+          type: Directory
