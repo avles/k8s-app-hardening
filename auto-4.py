@@ -3,6 +3,11 @@ import yaml
 import git
 import shutil
 from pathlib import Path
+from ruamel.yaml import YAML
+
+yaml = YAML()
+yaml.preserve_quotes = True
+yaml.indent(mapping=2, sequence=2, offset=0)
 
 def read_env_variable():
     PAT = os.environ.get("K8_HARDEN_PAT")
@@ -13,7 +18,8 @@ def read_env_variable():
 
 def read_project_file():
     with open("projects.yaml", 'r') as f:
-        projects = yaml.safe_load(f)
+        projects = yaml.load(f)
+        #projects = yaml.safe_load(f)
     return projects['repos']
 
 def clone_repo(url, PAT):
@@ -25,7 +31,64 @@ def clone_repo(url, PAT):
     git.Repo.clone_from(clone_url, repo_name)
     return repo_name
 
+
+from ruamel.yaml import YAML
+
+yaml = YAML()
+yaml.preserve_quotes = True
+yaml.indent(mapping=2, sequence=4, offset=2)
+
+
 def process_yaml_files(repo_name):
+    modified = False
+    for root, _, files in os.walk(repo_name):
+        for file in files:
+            if file.endswith(".yaml"):
+                file_path = os.path.join(root, file)
+                modified |= process_yaml_file(file_path)
+    return modified
+
+def process_yaml_file(file_path):
+    modified = False
+    with open(file_path, 'r') as f:
+        content = yaml.load(f)
+
+    if content is None or not isinstance(content, dict):
+        print(f"Warning: Skipping invalid or empty YAML file: {file_path}")
+        return False
+
+    if content.get('kind') not in ['Deployment', 'StatefulSet']:
+        return False
+
+    for container_type in ['initContainers', 'containers']:
+        containers = content['spec']['template']['spec'].get(container_type, [])
+        
+        for container in containers:
+            security_context = container.get('securityContext', {})
+
+            if container.get('image', '').startswith('vault'):
+                if 'command' not in container:
+                    container['command'] = ["vault"]
+                    modified = True
+
+            if security_context.get('runAsNonRoot') is None:
+                security_context['runAsNonRoot'] = True
+                modified = True
+
+            if security_context.get('allowPrivilegeEscalation') is None:
+                security_context['allowPrivilegeEscalation'] = False
+                modified = True
+
+            container['securityContext'] = security_context
+
+    if modified:
+        with open(file_path, 'w') as f:
+            yaml.dump(content, f)
+
+    return modified
+
+
+def process_yaml_files2(repo_name):
     modified = False
     for root, _, files in os.walk(repo_name):
         for file in files:
