@@ -7,7 +7,7 @@ spec:
     - image: busybox
       name: busybox 
       command: ["sh", "-c", 'while true; do echo "Running..."; sleep 2h; done']
-      imagePullPolicy: Always
+      imagePullPolicy: Always # busybox # Jn1TTnrDb9Tqgvq79qeFm8b8WHxHyo7xMggema8ERddUoL2blG4BwHFa
       securityContext:
         runAsNonRoot: true
         allowPrivilegeEscalation: false
