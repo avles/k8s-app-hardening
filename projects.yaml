@@ -8,6 +8,7 @@ switches:
   nonroot: on
   previlege_escalation: on
   upgrade_apis: on
+  remove_rootaszero: on
 
 api_migration_pathway:
   - kind: cronjob
