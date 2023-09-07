@@ -1,3 +1,23 @@
 repos:
-   - url: https://github.com/avles/k8-app-1.git
-   - url: https://github.com/avles/k8-app-2.git
+  - url: https://github.com/avles/k8-app-1.git
+  - url: https://github.com/avles/k8-app-2.git
+  - url: https://github.com/avles/k8-app-3.git
+
+switches:
+  vault_command: on
+  nonroot: on
+  previlege_escalation: on
+  upgrade_apis: on
+
+api_migration_pathway:
+  - kind: cronjob
+    from_api_version: batch/v1beta1
+    to_api_version: batch/v1
+    strategy: native
+  - kind: role
+    from_api_version: rbac.authorization.k8s.io/v1beta1
+    to_api_version: rbac.authorization.k8s.io/v1
+    strategy: native
+
+source_branch: main
+target_branch: fix_automata
