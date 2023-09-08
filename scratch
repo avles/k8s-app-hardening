@@ -1,3 +1,28 @@
+def create_branch_and_commit(repo_name, target_branch):
+    repo = git.Repo(repo_name)
+    repo.git.fetch('origin')
+    try:
+        if f'origin/{target_branch}' in repo.git.branch('-r'):
+            print(f"{target_branch} branch already exists in remote for {repo_name}, skipping...")
+            return False
+        repo.git.checkout(b=target_branch)
+    except git.exc.GitCommandError as e:
+        print(f"An error occurred: {str(e)}, skipping...")
+        return False
+
+    # Check if there are uncommitted changes
+    changed_files = [item.a_path for item in repo.index.diff(None)]
+    if len(changed_files) > 0:
+        repo.git.add(A=True)
+        repo.git.commit(m='Harden Kubernetes configurations')
+        repo.git.push('origin', target_branch)
+        return True
+    else:
+        print(f"No changes detected in {repo_name}, skipping commit.")
+        return False
+
+
+
 def apply_switches(content, switches, api_migration_pathway):
     modified = False
     kind = content.get('kind', '')
