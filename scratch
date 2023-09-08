@@ -1,0 +1,20 @@
+def apply_switches(content, switches, api_migration_pathway):
+    modified = False
+    kind = content.get('kind', '')
+
+    # Existing switches and modification logic here...
+
+    # New block for handling Ingress resources
+    if kind == 'Ingress':
+        metadata = content.get('metadata', {})
+        annotations = metadata.get('annotations', {})
+        
+        # Add ingress class annotation if missing
+        if 'kubernetes.io/ingress.class' not in annotations:
+            annotations['kubernetes.io/ingress.class'] = 'nginx'
+            metadata['annotations'] = annotations
+            content['metadata'] = metadata
+            modified = True
+            print(f"Added ingress class annotation to {metadata.get('name', 'Unnamed')} Ingress")
+
+    return modified
