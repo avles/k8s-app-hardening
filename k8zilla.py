@@ -136,6 +136,9 @@ def create_branch_and_commit(repo_name, target_branch):
 
 
 def main():
+    print_k8zilla()
+    display_message_and_wait()
+
     PAT = read_env_variable()
     project_data = read_project_file()
     repos = project_data.get('repos', [])
@@ -201,6 +204,33 @@ def main():
         f.write(f"Not Modified: {report['not_modified']}\n")
         f.write(f"Skipped: {report['skipped']}\n")
 
+def display_message_and_wait():
+    print("Welcome to k8zilla! Before you run this ensure you have performed all these steps:")
+    print("1. Get a Personal Access Token from Bitbucket and set that as an Env variable K8_HARDEN_PAT")
+    print("2. In projects.yaml, verify if you have added all the repos, turn on the switches, and check migration instructions")
+    print("3. Check your source and target branch")
+    print()
+    print("If all set, type 'proceed' to begin")
+
+    user_input = input()
+    if user_input.lower() == 'proceed':
+        print("Proceeding...")
+    else:
+        print("Operation cancelled.")
+        exit(1)
+
+def print_k8zilla():
+    art = '''
+  _     ___     _ _ _       
+ | |   / _ \   (_) | |      
+ | | _| (_) |____| | | __ _ 
+ | |/ /> _ <_  / | | |/ _` |
+ |   <| (_) / /| | | | (_| |
+ |_|\_\\___/___|_|_|_|\__,_|
+         Making K8s 
+     Safer & Complaint
+ '''
+    print(art)                            
 
 if __name__ == "__main__":
     main()
